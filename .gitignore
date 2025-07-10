@@ -1,0 +1,88 @@
+# 字节编译文件
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 发布打包文件
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# 单元测试 / 覆盖率报告
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# 环境变量文件
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE 文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 临时文件和工作目录
+*_temp/
+*_output/
+*.tmp
+*.temp
+
+# 电子书文件 (测试时使用)
+*.pdf
+*.docx
+*.epub
+*.mobi
+
+# 输出文件
+output.md
+output.html
+book.html
+*.log
+
+# 模型和大文件
+*.model
+*.bin
+*.h5

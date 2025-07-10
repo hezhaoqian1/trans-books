@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI翻译的中文电子书">
+    <meta name="keywords" content="电子书,翻译,Claude,AI">
+    <title>$if(title)$$title$$else$电子书$endif$</title>
+    
+    <!-- 预加载字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <style>
+        /* 字体定义 */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap');
+        
+        :root {
+            /* 亮色主题 */
+            --bg-color: #fefefe;
+            --text-color: #2c3e50;
+            --secondary-text: #5a6c7d;
+            --accent-color: #3498db;
+            --border-color: #e1e8ed;
+            --code-bg: #f8f9fa;
+            --quote-bg: #f4f6f8;
+            --shadow: rgba(0, 0, 0, 0.1);
+            
+            /* 字体变量 */
+            --primary-font: "仿宋", "FangSong", "STFangSong", "Noto Serif SC", serif;
+            --heading-font: "黑体", "SimHei", "Microsoft YaHei", "Noto Serif SC", sans-serif;
+            --code-font: "Consolas", "Monaco", "SF Mono", "Source Code Pro", monospace;
+            
+            /* 尺寸变量 */
+            --max-width: 900px;
+            --content-padding: 40px;
+            --line-height: 1.85;
+            --paragraph-spacing: 1.5em;
+        }
+        
+        /* 暗色主题 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #1a1a1a;
+                --text-color: #e8e8e8;
+                --secondary-text: #b8b8b8;
+                --accent-color: #4fc3f7;
+                --border-color: #404040;
+                --code-bg: #2d2d2d;
+                --quote-bg: #2a2a2a;
+                --shadow: rgba(0, 0, 0, 0.3);
+            }
+        }
+        
+        /* 重置样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* 基础样式 */
+        html {
+            scroll-behavior: smooth;
+            font-size: 18px;
+        }
+        
+        body {
+            font-family: var(--primary-font);
+            line-height: var(--line-height);
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: var(--content-padding);
+            transition: all 0.3s ease;
+        }
+        
+        /* 标题样式 */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--heading-font);
+            color: var(--accent-color);
+            margin: 2.5em 0 1.2em 0;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            text-align: center;
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 20px;
+            margin-bottom: 2em;
+            position: relative;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+        }
+        
+        h2 {
+            font-size: 2em;
+            border-left: 6px solid var(--accent-color);
+            padding-left: 20px;
+            margin-top: 3em;
+        }
+        
+        h3 {
+            font-size: 1.6em;
+            position: relative;
+            padding-left: 15px;
+        }
+        
+        h3::before {
+            content: '📖';
+            position: absolute;
+            left: -5px;
+            top: 0;
+        }
+        
+        h4 {
+            font-size: 1.4em;
+            color: var(--secondary-text);
+        }
+        
+        h5, h6 {
+            font-size: 1.2em;
+            color: var(--secondary-text);
+        }
+        
+        /* 段落样式 */
+        p {
+            margin: var(--paragraph-spacing) 0;
+            text-align: justify;
+            text-justify: inter-ideograph;
+            word-wrap: break-word;
+            text-indent: 2em; /* 中文段落首行缩进 */
+        }
+        
+        /* 首段不缩进 */
+        h1 + p, h2 + p, h3 + p, h4 + p, h5 + p, h6 + p {
+            text-indent: 0;
+        }
+        
+        /* 链接样式 */
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
+            border-bottom: 1px dotted var(--accent-color);
+            transition: all 0.3s ease;
+        }
+        
+        a:hover {
+            color: var(--text-color);
+            border-bottom-style: solid;
+        }
+        
+        /* 图片样式 */
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 2em auto;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        
+        img:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px var(--shadow);
+        }
+        
+        /* 引用样式 */
+        blockquote {
+            background: var(--quote-bg);
+            border-left: 6px solid var(--accent-color);
+            margin: 2em 0;
+            padding: 1.5em 2em;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            position: relative;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+        
+        blockquote::before {
+            content: '"';
+            font-size: 4em;
+            color: var(--accent-color);
+            opacity: 0.3;
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            font-family: Georgia, serif;
+        }
+        
+        blockquote p {
+            text-indent: 0;
+            margin: 0.5em 0;
+        }
+        
+        /* 代码样式 */
+        code {
+            font-family: var(--code-font);
+            background-color: var(--code-bg);
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            border: 1px solid var(--border-color);
+        }
+        
+        pre {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 2em 0;
+            box-shadow: 0 4px 12px var(--shadow);
+            position: relative;
+        }
+        
+        pre code {
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 0.95em;
+        }
+        
+        /* 列表样式 */
+        ul, ol {
+            margin: 1.5em 0;
+            padding-left: 2em;
+        }
+        
+        li {
+            margin: 0.8em 0;
+            line-height: 1.6;
+        }
+        
+        ul li::marker {
+            color: var(--accent-color);
+        }
+        
+        ol li::marker {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+        
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2em 0;
+            box-shadow: 0 4px 12px var(--shadow);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        th {
+            background-color: var(--accent-color);
+            color: white;
+            font-weight: 600;
+            font-family: var(--heading-font);
+        }
+        
+        tr:nth-child(even) {
+            background-color: var(--quote-bg);
+        }
+        
+        tr:hover {
+            background-color: var(--border-color);
+        }
+        
+        /* 分隔线样式 */
+        hr {
+            border: none;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+            margin: 4em 0;
+            border-radius: 2px;
+        }
+        
+        /* 强调样式 */
+        strong {
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+        
+        em {
+            font-style: italic;
+            color: var(--secondary-text);
+        }
+        
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--border-color);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-color);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            :root {
+                --content-padding: 20px;
+                --paragraph-spacing: 1.2em;
+            }
+            
+            html {
+                font-size: 16px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            h2 {
+                font-size: 1.6em;
+                padding-left: 15px;
+                border-left-width: 4px;
+            }
+            
+            h3 {
+                font-size: 1.3em;
+            }
+            
+            blockquote {
+                padding: 1em 1.5em;
+                margin: 1.5em 0;
+            }
+            
+            pre {
+                padding: 15px;
+                font-size: 14px;
+            }
+            
+            table {
+                font-size: 0.9em;
+            }
+            
+            th, td {
+                padding: 8px 12px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            :root {
+                --content-padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            h2 {
+                font-size: 1.4em;
+            }
+            
+            p {
+                text-indent: 1.5em;
+            }
+        }
+        
+        /* 打印样式 */
+        @media print {
+            body {
+                background: white;
+                color: black;
+                font-size: 12pt;
+                line-height: 1.5;
+                max-width: none;
+                padding: 0;
+            }
+            
+            h1, h2, h3, h4, h5, h6 {
+                color: black;
+                page-break-after: avoid;
+            }
+            
+            img {
+                max-width: 100%;
+                page-break-inside: avoid;
+            }
+            
+            blockquote {
+                page-break-inside: avoid;
+            }
+            
+            table {
+                page-break-inside: avoid;
+            }
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        body {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        /* 选择文本样式 */
+        ::selection {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        ::-moz-selection {
+            background-color: var(--accent-color);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 页面内容 -->
+    $body$
+    
+    <!-- JavaScript增强功能 -->
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // 图片点击放大功能
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                img.addEventListener('click', function() {
+                    if (this.style.transform === 'scale(1.2)') {
+                        this.style.transform = 'scale(1)';
+                        this.style.position = 'relative';
+                        this.style.zIndex = '1';
+                    } else {
+                        this.style.transform = 'scale(1.2)';
+                        this.style.position = 'relative';
+                        this.style.zIndex = '1000';
+                        this.style.transition = 'transform 0.3s ease';
+                    }
+                });
+            });
+            
+            // 代码块复制功能
+            const codeBlocks = document.querySelectorAll('pre');
+            codeBlocks.forEach(block => {
+                const button = document.createElement('button');
+                button.textContent = '复制';
+                button.style.cssText = `
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    background: var(--accent-color);
+                    color: white;
+                    border: none;
+                    padding: 5px 12px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 12px;
+                    opacity: 0;
+                    transition: opacity 0.3s;
+                `;
+                
+                block.style.position = 'relative';
+                block.appendChild(button);
+                
+                block.addEventListener('mouseenter', () => {
+                    button.style.opacity = '1';
+                });
+                
+                block.addEventListener('mouseleave', () => {
+                    button.style.opacity = '0';
+                });
+                
+                button.addEventListener('click', () => {
+                    const code = block.querySelector('code');
+                    navigator.clipboard.writeText(code.textContent).then(() => {
+                        button.textContent = '已复制!';
+                        setTimeout(() => {
+                            button.textContent = '复制';
+                        }, 2000);
+                    });
+                });
+            });
+            
+            // 阅读进度指示器
+            const progressBar = document.createElement('div');
+            progressBar.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 0%;
+                height: 3px;
+                background: linear-gradient(90deg, var(--accent-color), #63b3ed);
+                z-index: 9999;
+                transition: width 0.1s ease;
+            `;
+            document.body.appendChild(progressBar);
+            
+            function updateProgress() {
+                const scrollTop = window.scrollY;
+                const docHeight = document.body.scrollHeight - window.innerHeight;
+                const progress = (scrollTop / docHeight) * 100;
+                progressBar.style.width = progress + '%';
+            }
+            
+            window.addEventListener('scroll', updateProgress);
+            
+            // 返回顶部按钮
+            const backToTop = document.createElement('button');
+            backToTop.innerHTML = '↑';
+            backToTop.style.cssText = `
+                position: fixed;
+                bottom: 30px;
+                right: 30px;
+                width: 50px;
+                height: 50px;
+                border-radius: 25px;
+                background: var(--accent-color);
+                color: white;
+                border: none;
+                font-size: 20px;
+                cursor: pointer;
+                opacity: 0;
+                transition: all 0.3s ease;
+                z-index: 1000;
+            `;
+            
+            document.body.appendChild(backToTop);
+            
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    backToTop.style.opacity = '1';
+                } else {
+                    backToTop.style.opacity = '0';
+                }
+            });
+            
+            backToTop.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+            
+            // 自动添加段落编号（可选）
+            const addParagraphNumbers = false; // 设置为true启用
+            if (addParagraphNumbers) {
+                const paragraphs = document.querySelectorAll('p');
+                paragraphs.forEach((p, index) => {
+                    if (p.textContent.trim().length > 50) { // 只为长段落添加编号
+                        p.setAttribute('data-paragraph', index + 1);
+                        p.style.position = 'relative';
+                        
+                        const number = document.createElement('span');
+                        number.textContent = index + 1;
+                        number.style.cssText = `
+                            position: absolute;
+                            left: -30px;
+                            top: 0;
+                            color: var(--accent-color);
+                            font-size: 12px;
+                            opacity: 0.6;
+                        `;
+                        p.appendChild(number);
+                    }
+                });
+            }
+        });
+        
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            // 按 'T' 键回到顶部
+            if (e.key === 't' || e.key === 'T') {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+            
+            // 按 'B' 键回到底部
+            if (e.key === 'b' || e.key === 'B') {
+                window.scrollTo({
+                    top: document.body.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    </script>
+</body>
+</html>
