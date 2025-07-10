@@ -1,0 +1,27 @@
+# 电子书翻译系统依赖
+
+# 文档处理
+PyMuPDF>=1.23.0
+python-docx>=0.8.11
+ebooklib>=0.18
+pandoc>=2.3
+
+# 网络请求
+requests>=2.31.0
+
+# 图像处理
+Pillow>=10.0.0
+
+# 命令行工具
+click>=8.1.0
+rich>=13.0.0
+
+# 测试框架
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.11.0
+
+# 代码质量
+black>=23.0.0
+flake8>=6.0.0
+isort>=5.12.0
